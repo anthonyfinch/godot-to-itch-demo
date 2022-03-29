@@ -26,3 +26,11 @@ jobs:
         with:
           name: Godot To Itch Demo - ${{ matrix.platform }}
           path: ${{ github.workspace }}/${{ steps.build.outputs.build }}
+      - name: Deploy to Itch
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+          CHANNEL: ${{ matrix.platform }}
+          ITCH_GAME: godot-to-itch-demo
+          ITCH_USER: tfinch
+          PACKAGE: ${{ github.workspace }}/${{ steps.build.outputs.build }}
