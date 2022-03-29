@@ -1,15 +1,15 @@
 name: Build Game
 
 on:
-  push: {}
-  pull_request: {}
+  push:
+    branches: main
 
 jobs:
   godot:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [linux, windows, mac]
+        platform: [linux, windows, mac, web]
     steps:
       - uses: actions/checkout@v2
         with:
