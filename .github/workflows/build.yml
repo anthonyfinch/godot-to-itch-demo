@@ -1,12 +1,27 @@
-name: Build Game
+name: Build + Publish Game
 
 on:
   push:
-    tags:
-      - "*"
+    branches: main
 
 jobs:
-  godot:
+  set-version:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Bump version and tag
+        id: bump
+        uses: jaumann/github-bumpversion-action@v0.0.7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: version
+      - name: Push commit and tag
+        run: git push
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -14,6 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          ref: ${{ needs.set-version.output.new_tag }}
           lfs: true
       - name: Build
         id: build
