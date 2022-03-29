@@ -2,7 +2,8 @@ name: Build Game
 
 on:
   push:
-    tags: "*"
+    tags:
+      - "*"
 
 jobs:
   godot:
