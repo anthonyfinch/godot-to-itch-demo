@@ -53,7 +53,6 @@ jobs:
       - name: Build
         run: |
           mkdir -v -p build/${{ matrix.platform.name }}
-          cd $EXPORT_NAME
           godot -v --export ${{ matrix.platform.name}}  ../build/${{ matrix.platform.name }}/${{ matrix.platform.output }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
