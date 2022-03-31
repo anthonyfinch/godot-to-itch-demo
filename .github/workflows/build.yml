@@ -7,9 +7,6 @@ on:
 env:
   GODOT_VERSION: 3.4.2
   EXPORT_NAME: godot-to-itch-demo
-  ITCHIO_USER: tfinch
-  ITCHIO_GAME: godot-to-itch-demo
-
 
 jobs:
   set-version:
@@ -63,7 +60,11 @@ jobs:
         with:
           name: windows
           path: build/${{ matrix.platform.name }}
-      - name: Publish to Itch.io
-        uses: itchio:linux
-        run: |
-          butler push ./build/${{ matrix.platform.name }} $ITCHIO_USERNAME/$ITCHIO_GAME:${{ matrix.platform.name }}
+      - name: Deploy to Itch
+        uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+          CHANNEL: ${{ matrix.platform.name }}
+          ITCH_GAME: godot-to-itch-demo
+          ITCH_USER: tfinch
+          PACKAGE: build/${{ matrix.platform.name }}
