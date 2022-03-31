@@ -4,10 +4,6 @@ on:
   push:
     branches: main
 
-env:
-  GODOT_VERSION: 3.4.2
-  EXPORT_NAME: godot-to-itch-demo
-
 jobs:
   set-version:
     runs-on: ubuntu-20.04
@@ -24,7 +20,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: version
       - name: Push commit and tag
-        run: git push --tags
+        run: git push && git push --tags
   build:
     runs-on: ubuntu-20.04
     strategy:
@@ -50,6 +46,8 @@ jobs:
         run: |
           mkdir -v -p ~/.local/share/godot/templates
           mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
+        env:
+          GODOT_VERSION: 3.4.2
       - name: Build
         run: |
           mkdir -v -p build/${{ matrix.platform.name }}
