@@ -4,9 +4,16 @@ on:
   push:
     branches: main
 
+env:
+  GODOT_VERSION: 3.4.2
+  EXPORT_NAME: godot-to-itch-demo
+  ITCHIO_USER: tfinch
+  ITCHIO_GAME: godot-to-itch-demo
+
+
 jobs:
   set-version:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       new_tag: ${{ steps.bump.outputs.new_tag }}
     steps:
@@ -22,32 +29,41 @@ jobs:
       - name: Push commit and tag
         run: git push
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        platform: [linux, windows, mac, web]
+        platform:
+          - name: "windows"
+            output: "GodotToItchDemo.exe"
+          - name: "linux"
+            output: "GodotToItchDemo.x86_64"
+          - name: "mac"
+            output: "GodotToItchDemo.zip"
+          - name: "web"
+            output: "index.html"
+    container:
+      image: barichello/godot-ci:3.4.2
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           ref: ${{ needs.set-version.output.new_tag }}
           lfs: true
+      - name: Setup
+        run: |
+          mkdir -v -p ~/.local/share/godot/templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
       - name: Build
-        id: build
-        uses: josephbmanley/build-godot-action@v1.4.1
-        with:
-          name: godot-to-itch-demo
-          preset: ${{ matrix.platform }}
-          debugMode: "true"
+        run: |
+          mkdir -v -p build/${{ matrix.platform.name }}
+          cd $EXPORT_NAME
+          godot -v --export ${{ matrix.platform.name}}  ../build/${{ matrix.platform.name }}/${{ matrix.platform.output }}
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v1
         with:
-          name: Godot To Itch Demo - ${{ matrix.platform }}
-          path: ${{ github.workspace }}/${{ steps.build.outputs.build }}
-      - name: Deploy to Itch
-        uses: josephbmanley/butler-publish-itchio-action@master
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
-          CHANNEL: ${{ matrix.platform }}
-          ITCH_GAME: godot-to-itch-demo
-          ITCH_USER: tfinch
-          PACKAGE: ${{ github.workspace }}/${{ steps.build.outputs.build }}
+          name: windows
+          path: build/${{ matrix.platform.name }}
+      - name: Publish to Itch.io
+        uses: itchio:linux
+        run: |
+          butler push ./build/${{ matrix.platform.name }} $ITCHIO_USERNAME/$ITCHIO_GAME:${{ matrix.platform.name }}
