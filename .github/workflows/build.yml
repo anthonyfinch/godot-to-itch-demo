@@ -64,6 +64,6 @@ jobs:
           name: windows
           path: build/${{ matrix.platform.name }}
       - name: Publish to Itch.io
-        uses: itchio:linux
-        run: |
-          butler push ./build/${{ matrix.platform.name }} $ITCHIO_USERNAME/$ITCHIO_GAME:${{ matrix.platform.name }}
+        uses: docker://itchio:linux
+        with:
+          args: /bin/bash -c "butler push ./build/${{ matrix.platform.name }} $ITCHIO_USERNAME/$ITCHIO_GAME:${{ matrix.platform.name }}"
