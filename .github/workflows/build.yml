@@ -38,7 +38,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: windows
+          name: ${{ matrix.platform.name }}
           path: build/${{ matrix.platform.name }}
       - name: Deploy to Itch
         uses: josephbmanley/butler-publish-itchio-action@master
